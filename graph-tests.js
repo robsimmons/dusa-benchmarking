@@ -1,11 +1,23 @@
 // Run: node graph-tests.js > results/graph-tests.csv
 
 import { exec } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { DANGER_RESET_DATA, Dusa } from '../lib/client.cjs';
 
-const graphdata = JSON.parse(readFileSync('data/test-graphs-200-to-2000-edges.json'));
+const avoidDups = new Set();
+const graphdata = [];
+for (const gd of [
+  JSON.parse(readFileSync('data/test-graphs-32-to-224-edges-step-32.json')),
+  JSON.parse(readFileSync('data/test-graphs-256-to-1792-edges-step-256.json')),
+  JSON.parse(readFileSync('data/test-graphs-2048-to-14336-edges-step-2048.json')),
+]) {
+  for (const graphset of gd) {
+    if (avoidDups.has(graphset.numEdges)) continue;
+    avoidDups.add(graphset.numEdges);
+    graphdata.push(graphset);
+  }
+}
 
 // Write graphs to file
 const tmp = tmpdir();
@@ -15,6 +27,7 @@ function getFilename(graphType, numEdges) {
 for (const { numEdges, graphs } of graphdata) {
   for (const [tp, graph] of Object.entries(graphs)) {
     const filename = getFilename(tp, numEdges);
+    // console.log(filename);
     writeFileSync(
       filename,
       `
@@ -27,6 +40,9 @@ ${graph.edges.map(([a, b]) => `edge(${a},${b}).`).join('\n')}
   }
 }
 
+const DUSA_VERSION = JSON.parse(readFileSync('package-lock.json')).packages['node_modules/dusa']
+  .version;
+
 const CLINGO_VERSION = await new Promise((resolve) => {
   exec('clingo -v', (error, stdout) => {
     if (error || typeof stdout !== 'string' || !stdout.startsWith('clingo version ')) {
@@ -36,6 +52,22 @@ const CLINGO_VERSION = await new Promise((resolve) => {
       const version = stdout.split('\n')[0].slice('clingo version '.length);
       process.stderr.write(`info: using clingo, found version ${version} on path\n`);
       resolve(version);
+    }
+  });
+});
+
+const ALPHA_EXISTS = await new Promise((resolve) => {
+  exec('java --version', (error, stdout) => {
+    if (error || typeof stdout !== 'string') {
+      process.stderr.write('info: omitting alpha, did not successfully find java on path\n');
+      resolve(false);
+    } else if (!existsSync('alpha.jar')) {
+      process.stderr.write('info: omitting alpha, alpha.jar needs to be in this directory\n');
+      process.stderr.write('info: alpha.jar can be found at https://github.com/alpha-asp/Alpha');
+      resolve(false);
+    } else {
+      process.stderr.write(`info: using alpha via ${stdout.split('\n')[0]}\n`);
+      resolve(true);
     }
   });
 });
@@ -77,8 +109,10 @@ function testCanonicalRepsInDusa(edges, numNodes) {
   return { time: end - start, size };
 }
 
+const TIMEOUT = 10 * 1000;
+const TIMEOUT_EPSILON = 500;
 let reps = 0;
-console.log('Algorithm,System,Graph type,Problem Size,Rep,Time,Output');
+console.log('Algorithm,Dialect,System,Graph type,Problem Size,Rep,Time,Output');
 while (reps < 15) {
   reps += 1;
   for (const { numEdges, graphs } of graphdata) {
@@ -87,78 +121,138 @@ while (reps < 15) {
       {
         const { time, size } = testSpanningTreeInDusa(graph.edges);
         console.log(
-          `spanning-tree,dusa,${tp},${numEdges},${reps},${time},${size / graph.numNodes}`,
+          `spanning-tree,fclp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${
+            size / graph.numNodes
+          }`,
         );
       }
 
       // Dusa / Canonical-reps
       {
         const { time, size } = testCanonicalRepsInDusa(graph.edges, graph.numNodes);
-        console.log(`canonical-reps,dusa,${tp},${numEdges},${reps},${time},${size}`);
+        console.log(
+          `canonical-reps,fclp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${size}`,
+        );
       }
 
-      // Clingo / Spanning Tree (Idiomatic)
-      if (CLINGO_VERSION) {
+      const seed = Math.floor(Math.random() * 100000);
+      const filename = getFilename(tp, numEdges);
+
+      // Alpha / Spanning Tree (Pure ASP)
+      if (ALPHA_EXISTS) {
         const start = performance.now();
-        const seed = Math.floor(Math.random() * 100000);
-        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${getFilename(
-          tp,
-          numEdges,
-        )} asp/spanning-tree.lp asp/spanning-tree-treecount.lp`;
+        const command = `java -jar alpha.jar -n1 -dni -i ${filename} -i asp/spanning-tree-pure-asp.lp -ftreecount -e${seed}`;
         // console.log(command);
         const output = await new Promise((resolve) => {
-          exec(command, (_error, stdout, _stderr) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            // console.log(stdout);
+            resolve(parseInt(stdout.slice(26)));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output / graph.numNodes, time: end - start };
+        console.log(`spanning-tree,pure-asp,alpha,${tp},${numEdges},${reps},${time},${result}`);
+      }
+
+      // Alpha / Canonical Representative (Pure ASP)
+      if (ALPHA_EXISTS) {
+        const start = performance.now();
+        const command = `java -jar alpha.jar -n1 -dni -i ${filename} -i asp/canonical-reps-pure-asp.lp -frepcount -e${seed}`;
+        // console.log(command);
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            // console.log(stdout);
+            resolve(parseInt(stdout.slice(25)));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output, time: end - start };
+        console.log(`canonical-reps,pure-asp,alpha,${tp},${numEdges},${reps},${time},${result}`);
+      }
+
+      // Clingo / Spanning Tree (Clingo ASP)
+      if (CLINGO_VERSION) {
+        const start = performance.now();
+        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${filename} asp/spanning-tree-clingo-asp.lp asp/spanning-tree-show-treecount-clingo.lp`;
+        // console.log(command);
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
             resolve(parseInt(stdout.slice(10)));
           });
         });
         const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output / graph.numNodes, time: end - start };
         console.log(
-          `spanning-tree,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${end - start},${
-            output / graph.numNodes
-          }`,
+          `spanning-tree,clingo-asp,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${time},${result}`,
         );
       }
 
       // Clingo / Spanning Tree (Pure ASP)
       if (CLINGO_VERSION) {
         const start = performance.now();
-        const seed = Math.floor(Math.random() * 100000);
-        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${getFilename(
-          tp,
-          numEdges,
-        )} asp/spanning-tree-pure-asp.lp asp/spanning-tree-treecount.lp`;
+        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${filename} asp/spanning-tree-pure-asp.lp asp/spanning-tree-show-treecount-clingo.lp`;
         // console.log(command);
         const output = await new Promise((resolve) => {
-          exec(command, (_error, stdout, _stderr) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
             resolve(parseInt(stdout.slice(10)));
           });
         });
         const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output / graph.numNodes, time: end - start };
         console.log(
-          `spanning-tree-pure-asp,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${end - start},${
-            output / graph.numNodes
-          }`,
+          `spanning-tree,pure-asp,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${time},${result}`,
         );
       }
 
-      // Clingo / Canonical-reps
+      // Clingo / Canonical Representative (Clingo ASP)
       if (CLINGO_VERSION) {
         const start = performance.now();
         const seed = Math.floor(Math.random() * 100000);
-        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${getFilename(
-          tp,
-          numEdges,
-        )} asp/canonical-reps.lp`;
+        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${filename} asp/canonical-reps-clingo-asp.lp asp/canonical-reps-show-repcount-clingo.lp`;
         const output = await new Promise((resolve) => {
-          exec(command, (_error, stdout, _stderr) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
             resolve(parseInt(stdout.slice(9)));
           });
         });
         const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output, time: end - start };
         console.log(
-          `canonical-reps,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${
-            end - start
-          },${output}`,
+          `canonical-reps,clingo-asp,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${time},${result}`,
+        );
+      }
+
+      // Clingo / Canonical Representative (Pure ASP)
+      if (CLINGO_VERSION) {
+        const start = performance.now();
+        const seed = Math.floor(Math.random() * 100000);
+        const command = `clingo -n1 -V0 --rand-freq=1 --seed=${seed} ${filename} asp/canonical-reps-pure-asp.lp asp/canonical-reps-show-repcount-clingo.lp`;
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            resolve(parseInt(stdout.slice(9)));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output, time: end - start };
+        console.log(
+          `canonical-reps,pure-asp,clingo-${CLINGO_VERSION},${tp},${numEdges},${reps},${time},${result}`,
         );
       }
     }
