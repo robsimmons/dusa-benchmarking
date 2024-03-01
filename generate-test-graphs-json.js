@@ -12,10 +12,10 @@ function makeEdges(numEdges, type) {
   //    so the probabilty P of an edge should be 8/(x - 2)
   // sparse-linear: V = E+2 nodes, always an edge from n to n+1 with one exception
   // sparse-cycles: V = E-2 nodes, two components that are both shaped like an 8
-  // mid-random: we want kinda about V^1.1 = E
-  //    so we want V(V-1)/2 * P = V^1.1
-  //    so we want about P = 2*V^0.1/(V - 1)
-  //    and we want V = 2*E^(10/11)
+  // mid-random: we want V^(5/4) = E
+  //    so we want V(V-1)/2 * P = V^(5/4)
+  //    so we want about P = 2*V^(1/4)/(V - 1)
+  //    and we want V = 2*E^(4/5)
   // dense-random: we want 1/4 of edges to exist
   //    so we want V(V-1)/2 * 1/4 = E
   //    so we want V = (1 + sqrt(1 + 32E))/2 vertices (and we'll round up)
@@ -51,8 +51,8 @@ function makeEdges(numEdges, type) {
       return { ...makeEightsGraph(numEdges), actualNumEdges: numEdges };
     }
     case 'mid-random': {
-      numNodes = Math.floor(Math.pow(numEdges, 10 / 11));
-      probabilityOfEdge = (2 * Math.pow(numNodes, 0.1)) / (numNodes - 1);
+      numNodes = Math.floor(Math.pow(numEdges, 4 / 5));
+      probabilityOfEdge = (2 * Math.pow(numNodes, 1 / 4)) / (numNodes - 1);
       break;
     }
     case 'dense-random':
