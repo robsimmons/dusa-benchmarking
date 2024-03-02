@@ -3,7 +3,6 @@
 import { exec } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { DANGER_RESET_DATA, Dusa } from '../lib/client.cjs';
 
 const avoidDups = new Set();
 const graphdata = [];
@@ -81,43 +80,6 @@ const ALPHA_EXISTS = await new Promise((resolve) => {
     }
   });
 });
-
-function testSpanningTreeInDusa(edges) {
-  DANGER_RESET_DATA();
-  const start = performance.now();
-  const dusa = new Dusa(`
-      edge Y X :- edge X Y.
-      root is { X? } :- edge X _.
-      parent X is X :- root is X.
-      parent X is { Y? } :- edge X Y, parent Y is _.`);
-  for (const [a, b] of edges) {
-    dusa.assert({ name: 'edge', args: [a, b] });
-  }
-  const size = [...dusa.sample().lookup('parent')].length;
-  const end = performance.now();
-  return { time: end - start, size };
-}
-
-function testCanonicalRepsInDusa(edges, numNodes) {
-  DANGER_RESET_DATA();
-  const start = performance.now();
-  const dusa = new Dusa(`
-      edge Y X :- edge X Y.
-      representative X is { X? } :- node X.
-      representative Y is Rep :-
-          edge X Y,
-          representative X is Rep.
-      isRep Rep :- representative _ is Rep.`);
-  for (let i = 0; i < numNodes; i++) {
-    dusa.assert({ name: 'node', args: [i] });
-  }
-  for (const [a, b] of edges) {
-    dusa.assert({ name: 'edge', args: [a, b] });
-  }
-  const size = [...dusa.sample().lookup('isRep')].length;
-  const end = performance.now();
-  return { time: end - start, size };
-}
 
 const NUMBER_OF_REPS = 5;
 const TIMEOUT_IN_SECONDS = 60;
