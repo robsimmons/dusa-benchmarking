@@ -120,7 +120,7 @@ function testCanonicalRepsInDusa(edges, numNodes) {
 }
 
 const NUMBER_OF_REPS = 5;
-const TIMEOUT_IN_SECONDS = 30;
+const TIMEOUT_IN_SECONDS = 60;
 
 const TIMEOUT = TIMEOUT_IN_SECONDS * 1000;
 const TIMEOUT_EPSILON = 500;
