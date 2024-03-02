@@ -21,21 +21,31 @@ for (const gd of [
 
 // Write graphs to file
 const tmp = tmpdir();
-function getFilename(graphType, numEdges) {
+function getDataLP(graphType, numEdges) {
   return `${tmp}/graph-${graphType}-${numEdges}.lp`;
+}
+function getDataJSON(graphType, numEdges) {
+  return `${tmp}/graph-${graphType}-${numEdges}.json`;
 }
 for (const { numEdges, graphs } of graphdata) {
   for (const [tp, graph] of Object.entries(graphs)) {
-    const filename = getFilename(tp, numEdges);
-    // console.log(filename);
+    // console.log(getDataLP(tp, numEdges));
+    // console.log(getDataJSON(tp, numEdges));
     writeFileSync(
-      filename,
+      getDataLP(tp, numEdges),
       `
 ${Array.from({ length: graph.numNodes })
   .map((_, i) => `node(${i}).`)
   .join('\n')}
 ${graph.edges.map(([a, b]) => `edge(${a},${b}).`).join('\n')}
 `,
+    );
+    writeFileSync(
+      getDataJSON(tp, numEdges),
+      JSON.stringify([
+        ...Array.from({ length: graph.numNodes }).map((_, i) => ({ name: 'node', args: [i] })),
+        ...graph.edges.map((args) => ({ name: 'edge', args })),
+      ]),
     );
   }
 }
@@ -109,34 +119,105 @@ function testCanonicalRepsInDusa(edges, numNodes) {
   return { time: end - start, size };
 }
 
-const TIMEOUT = 10 * 1000;
+const NUMBER_OF_REPS = 5;
+const TIMEOUT_IN_SECONDS = 30;
+
+const TIMEOUT = TIMEOUT_IN_SECONDS * 1000;
 const TIMEOUT_EPSILON = 500;
 let reps = 0;
 console.log('Algorithm,Dialect,System,Graph type,Problem Size,Rep,Time,Output');
-while (reps < 15) {
+while (reps < NUMBER_OF_REPS) {
   reps += 1;
   for (const { numEdges, graphs } of graphdata) {
     for (const [tp, graph] of Object.entries(graphs)) {
-      // Dusa / Spanning Tree
+      const jsonFilename = getDataJSON(tp, numEdges);
+
+      // Dusa / Spanning Tree / FCLP
       {
-        const { time, size } = testSpanningTreeInDusa(graph.edges);
+        const start = performance.now();
+        const command = `node run-dusa.js asp/spanning-tree.dusa ${jsonFilename} parent`;
+        // console.log(command);
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            // console.log(stdout);
+            resolve(parseInt(stdout));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output / graph.numNodes, time: end - start };
         console.log(
-          `spanning-tree,fclp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${
-            size / graph.numNodes
-          }`,
+          `spanning-tree,fclp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${result}`,
         );
       }
 
-      // Dusa / Canonical-reps
+      // Dusa / Spanning Tree / Pure ASP
       {
-        const { time, size } = testCanonicalRepsInDusa(graph.edges, graph.numNodes);
+        const start = performance.now();
+        const command = `node run-dusa.js asp/spanning-tree-pure-asp.dusa ${jsonFilename} parent`;
+        // console.log(command);
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            // console.log(stdout);
+            resolve(parseInt(stdout));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output / graph.numNodes, time: end - start };
         console.log(
-          `canonical-reps,fclp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${size}`,
+          `spanning-tree,pure-asp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${result}`,
         );
       }
 
-      const seed = Math.floor(Math.random() * 100000);
-      const filename = getFilename(tp, numEdges);
+      // Dusa / Canoncal Reps / FCLP
+      {
+        const start = performance.now();
+        const command = `node run-dusa.js asp/canonical-reps.dusa ${jsonFilename} isRep`;
+        // console.log(command);
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            // console.log(stdout);
+            resolve(parseInt(stdout));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output, time: end - start };
+        console.log(
+          `canonical-reps,fclp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${result}`,
+        );
+      }
+
+      // Dusa / Canoncal Reps / Pure ASP
+      {
+        const start = performance.now();
+        const command = `node run-dusa.js asp/canonical-reps-pure-asp.dusa ${jsonFilename} isRep`;
+        // console.log(command);
+        const output = await new Promise((resolve) => {
+          exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+            // console.log(stdout);
+            resolve(parseInt(stdout));
+          });
+        });
+        const end = performance.now();
+        const { result, time } =
+          end - start > TIMEOUT
+            ? { result: 0, time: TIMEOUT }
+            : { result: output, time: end - start };
+        console.log(
+          `canonical-reps,pure-asp,dusa-${DUSA_VERSION},${tp},${numEdges},${reps},${time},${result}`,
+        );
+      }
+
+      const seed = 0xcafe + 0xbeef * reps; // Whimsy
+      const filename = getDataLP(tp, numEdges);
 
       // Alpha / Spanning Tree (Pure ASP)
       if (ALPHA_EXISTS) {

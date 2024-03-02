@@ -1,0 +1,22 @@
+edge X Y :- edge Y X.
+
+# Exactly one root
+root X is { tt, ff } :- node X.
+#forbid root X is tt, root Y is tt, X != Y.
+someRoot is tt :- root X is tt.
+someRoot is { ff? }.
+#forbid someRoot is ff.
+
+# The root has itself as a parent
+parent X X is tt :- root X.
+
+# If P is in the tree and X-P is in the tree, P can be a parent
+inTree P is tt :- parent P _ is tt.
+parent X P is { tt, ff } :- edge X P, inTree P.
+
+# A node can have no more than 1 parent
+#forbid parent X P1 is tt, parent X P2 is tt, P1 != P2.
+
+# If connected to a tree node, you must be in the tree
+inTree Y is { ff? } :- edge X Y, inTree X is tt.
+#forbid edge X Y, inTree X is tt, inTree Y is ff.

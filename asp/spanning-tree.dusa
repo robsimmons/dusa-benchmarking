@@ -1,0 +1,12 @@
+edge Y X :- edge X Y.
+
+# Exactly one root
+root is { X? } :- edge X _.
+
+# The root has itself as a parent
+parent X is X :- root is X.
+
+# If P is in the tree and X-P is an edge, P can be a parent
+# A node can have no more than one parent
+# If connected to a tree node, you must be in the tree
+parent X is { P? } :- edge X P, parent P is _.

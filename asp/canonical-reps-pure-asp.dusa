@@ -1,0 +1,20 @@
+edge Y X :- edge X Y.
+
+# Any node may be its own representative
+representative X X is { tt, ff } :- node X.
+
+# Connected nodes must have the same representative
+representative X Rep is tt :-
+    edge X Y,
+    representative Y Rep is tt.
+
+# Representatives must be unique
+#forbid representative X R1 is tt, representative X R2 is tt, R1 != R2.
+
+# Each node must have a representative
+hasRep X is tt :- representative X _ is tt.
+hasRep X is { ff? } :- node X.
+#forbid node X, hasRep X is ff.
+
+# Count the number of connected components
+isRep Rep :- representative _ Rep is tt.
