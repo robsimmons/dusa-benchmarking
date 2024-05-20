@@ -47,22 +47,22 @@ export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToC
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
-  const output = await new Promise((resolve) => {
+  const [solutions, result] = await new Promise((resolve) => {
     exec(command, { timeout: timeout + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
       const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
-      if (!stdout.trim().endsWith('DONE') || matches.length === 0) {
-        resolve(-1);
+      if (!stdout.trim().endsWith('DONE')) {
+        resolve([-1, 0]);
         return;
       }
       let sum = 0;
       for (const match of matches) {
         sum += parseInt(match[1]);
       }
-      resolve(sum);
+      resolve([matches.length, sum]);
     });
   });
   const end = performance.now();
-  return end - start > timeout ? { result: -2, time: timeout } : { result: output, time: end - start };
+  return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }
 
 export async function testClingo(clingoProgram, dataFilename, relation, seed, solutionsToCount = 1, timeout = TIMEOUT) {
@@ -73,22 +73,22 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
-  const output = await new Promise((resolve) => {
+  const [solutions, result] = await new Promise((resolve) => {
     exec(command, { timeout: timeout + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
       const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
-      if (!stdout.trim().endsWith('SATISFIABLE') || matches.length === 0) {
-        resolve(-1);
+      if (!stdout.trim().endsWith('SATISFIABLE')) {
+        resolve([-1, 0]);
         return;
       }
       let sum = 0;
       for (const match of matches) {
         sum += parseInt(match[1]);
       }
-      resolve(sum);
+      resolve([matches.length, sum]);
     });
   });
   const end = performance.now();
-  return end - start > timeout ? { result: -2, time: timeout } : { result: output, time: end - start };
+  return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }
 
 export async function testAlpha(alphaProgram, dataFilename, relation, seed, solutionsToCount = 1, timeout = TIMEOUT) {
@@ -97,20 +97,20 @@ export async function testAlpha(alphaProgram, dataFilename, relation, seed, solu
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
-  const output = await new Promise((resolve) => {
+  const [solutions, result] = await new Promise((resolve) => {
     exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
       const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
-      if (!stdout.trim().endsWith('SATISFIABLE') || matches.length === 0) {
-        resolve(-1);
+      if (!stdout.trim().endsWith('SATISFIABLE')) {
+        resolve([-1, 0]);
         return;
       }
       let sum = 0;
       for (const match of matches) {
         sum += parseInt(match[1]);
       }
-      resolve(sum);
+      resolve([matches.length, sum]);
     });
   });
   const end = performance.now();
-  return end - start > timeout ? { result: -2, time: timeout } : { result: output, time: end - start };
+  return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }

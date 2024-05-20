@@ -59,7 +59,7 @@ ${graph.edges.map(([a, b]) => `edge(${a},${b}).`).join('\n')}
 }
 
 PRINT_COMMANDS_TO_STDERR.current = true;
-console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Output');
+console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Solutions,Output');
 for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
   for (const { numEdges, graphs } of graphdata) {
     for (const [variant, graph] of Object.entries(graphs)) {
@@ -69,54 +69,54 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
 
       // spanning-tree
       {
-        const { result, time } = await testDusa('spanning-tree', jsonFilename, 'parent');
-        console.log(`spanning-tree,fclp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testDusa('spanning-tree', jsonFilename, 'parent');
+        console.log(`spanning-tree,fclp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       {
-        const { result, time } = await testDusa('spanning-tree-pure-asp', jsonFilename, 'p');
-        console.log(`spanning-tree,pure-asp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testDusa('spanning-tree-pure-asp', jsonFilename, 'p');
+        console.log(`spanning-tree,pure-asp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (ALPHA_EXISTS) {
-        const { result, time } = await testAlpha('spanning-tree-pure-asp', filename, 'treecount', seed);
-        console.log(`spanning-tree,pure-asp,alpha,${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testAlpha('spanning-tree-pure-asp', filename, 'treecount', seed);
+        console.log(`spanning-tree,pure-asp,alpha,${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (CLINGO_VERSION) {
-        const { result, time } = await testClingo('spanning-tree-clingo-asp', filename, 'treecount', seed);
-        console.log(`spanning-tree,clingo-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testClingo('spanning-tree-clingo-asp', filename, 'treecount', seed);
+        console.log(`spanning-tree,clingo-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (CLINGO_VERSION) {
-        const { result, time } = await testClingo('spanning-tree-pure-asp', filename, 'treecount', seed);
-        console.log(`spanning-tree,pure-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testClingo('spanning-tree-pure-asp', filename, 'treecount', seed);
+        console.log(`spanning-tree,pure-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       // canonical-reps
       {
-        const { result, time } = await testDusa('canonical-reps', jsonFilename, 'isRep');
-        console.log(`canonical-reps,fclp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testDusa('canonical-reps', jsonFilename, 'isRep');
+        console.log(`canonical-reps,fclp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       {
-        const { result, time } = await testDusa('canonical-reps-pure-asp', jsonFilename, 'isRep');
-        console.log(`canonical-reps,pure-asp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testDusa('canonical-reps-pure-asp', jsonFilename, 'isRep');
+        console.log(`canonical-reps,pure-asp,dusa-${DUSA_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (ALPHA_EXISTS) {
-        const { result, time } = await testAlpha('canonical-reps-pure-asp', filename, 'repcount', seed);
-        console.log(`canonical-reps,pure-asp,alpha,${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testAlpha('canonical-reps-pure-asp', filename, 'repcount', seed);
+        console.log(`canonical-reps,pure-asp,alpha,${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (CLINGO_VERSION) {
-        const { result, time } = await testClingo('canonical-reps-clingo-asp', filename, 'repcount', seed);
-        console.log(`canonical-reps,clingo-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testClingo('canonical-reps-clingo-asp', filename, 'repcount', seed);
+        console.log(`canonical-reps,clingo-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (CLINGO_VERSION) {
-        const { result, time } = await testClingo('canonical-reps-pure-asp', filename, 'repcount', seed);
-        console.log(`canonical-reps,pure-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${result}`);
+        const { solutions, result, time } = await testClingo('canonical-reps-pure-asp', filename, 'repcount', seed);
+        console.log(`canonical-reps,pure-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
     }
   }

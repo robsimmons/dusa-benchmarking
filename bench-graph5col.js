@@ -4,7 +4,6 @@ import {
   ALPHA_EXISTS,
   CLINGO_VERSION,
   DUSA_VERSION,
-  NUMBER_OF_REPS,
   PRINT_COMMANDS_TO_STDERR,
   testAlpha,
   testClingo,
@@ -41,7 +40,7 @@ function getDataJSON(nodes, edges, reps) {
 }
 
 PRINT_COMMANDS_TO_STDERR.current = true;
-console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Output');
+console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Solutions,Output');
 let i = 0;
 for (const [name, { nodes, edges, variants }] of [...Object.entries(data)].sort(([_a, a], [_b, b]) => a.nodes - b.nodes)) {
   for (const [reps, variant] of variants.entries()) {
@@ -51,18 +50,18 @@ for (const [name, { nodes, edges, variants }] of [...Object.entries(data)].sort(
     const jsonFilename = getDataJSON(nodes, variant, reps);
 
     {
-      const { result, time } = await testDusa('graph5col', jsonFilename, 'isRed', 10);
-      console.log(`graph5col,fclp,dusa-${DUSA_VERSION},${edges / nodes},${nodes},${reps},${time},${result}`);
+      const { solutions, result, time } = await testDusa('graph5col', jsonFilename, 'isRed', 10);
+      console.log(`graph5col,fclp,dusa-${DUSA_VERSION},${edges / nodes},${nodes},${reps},${time},${solutions},${result}`);
     }
 
     if (ALPHA_EXISTS) {
-      const { result, time } = await testAlpha('graph5col', lpFilename, 'numRed', seed, 10);
-      console.log(`graph5col,pure-asp,alpha,${edges / nodes},${nodes},${reps},${time},${result}`);
+      const { solutions, result, time } = await testAlpha('graph5col', lpFilename, 'numRed', seed, 10);
+      console.log(`graph5col,pure-asp,alpha,${edges / nodes},${nodes},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { result, time } = await testClingo('graph5col', lpFilename, 'numRed', seed, 10);
-      console.log(`graph5col,pure-asp,clingo-${CLINGO_VERSION},${edges / nodes},${nodes},${reps},${time},${result}`);
+      const { solutions, result, time } = await testClingo('graph5col', lpFilename, 'numRed', seed, 10);
+      console.log(`graph5col,pure-asp,clingo-${CLINGO_VERSION},${edges / nodes},${nodes},${reps},${time},${solutions},${result}`);
     }
   }
 }
