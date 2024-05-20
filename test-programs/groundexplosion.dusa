@@ -1,0 +1,19 @@
+#builtin INT_MINUS minus
+
+dom (minus X 1) :- dom X, X != 1.
+
+p X1 X2 X3 X4 X5 X6 :- 
+  select X1 is tt,
+  select X2 is tt,
+  select X3 is tt,
+  select X4 is tt,
+  select X5 is tt,
+  select X6 is tt.
+
+select X is? ff :- dom X.
+select X is tt :- dom X, nselect X is ff.
+
+nselect X is? ff :- dom X.
+nselect X is tt :- dom X, select X is ff.
+
+#forbid nselect Y is ff, select X is tt, dom Y, X != Y.

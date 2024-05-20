@@ -1,0 +1,21 @@
+# Naive N Queens #2
+#builtin INT_MINUS minus
+#builtin INT_PLUS plus
+
+dim X :- size is X.
+dim (minus X 1) :- dim X, X != 1.
+
+col N is? X :- dim N, dim X.
+row N is? Y :- dim N, dim Y.
+#forbid col N is X, col M is X, N != M.
+#forbid row N is Y, row M is Y, N != M.
+#forbid 
+  row N is X1, col N is Y1,
+  row M is X2, col M is Y2,
+  N != M,
+  minus X1 Y1 == minus X2 Y2.
+#forbid 
+  row N is X1, col N is Y1,
+  row M is X2, col M is Y2,
+  N != M,
+  plus X1 Y1 == plus X2 Y2.

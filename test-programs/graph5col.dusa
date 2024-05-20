@@ -1,0 +1,4 @@
+color N is { red, green, blue, yellow, cyan } :- node N.
+#forbid link X Y, X < Y, color X is C, color Y is C.
+
+isRed N :- color N is red.

@@ -1,0 +1,12 @@
+#builtin INT_MINUS minus
+#builtin INT_PLUS plus
+#builtin INT_TIMES times
+
+dim X :- size is X.
+dim (minus X 1) :- dim X, X != 1.
+
+rowFor X is? Y :- dim X, dim Y.
+colFor Y is X :- rowFor X is Y.
+
+posDiag (plus X Y) is (tuple X Y) :- rowFor X is Y.
+negDiag (minus X Y) is (tuple X Y) :- rowFor X is Y.

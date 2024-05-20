@@ -1,0 +1,26 @@
+#builtin INT_MINUS minus
+#builtin INT_PLUS plus
+
+dim X :- size is X.
+dim (minus X 1) :- dim X, X != 1.
+
+location N is? (tuple X Y) :- dim N, dim X, dim Y.
+
+#forbid 
+  location N is (tuple X _), 
+  location M is (tuple X _), 
+  N != M.
+#forbid 
+  location N is (tuple _ Y), 
+  location M is (tuple _ Y),
+  N != M.
+#forbid 
+  location N is (tuple X1 Y1), 
+  location M is (tuple X2 Y2), 
+  N != M,
+  minus X1 Y1 == minus X2 Y2.
+#forbid
+  location N is (tuple X1 Y1),
+  location M is (tuple X2 Y2),
+  N != M,
+  plus X1 Y1 == plus X2 Y2.

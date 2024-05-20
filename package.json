@@ -2,6 +2,6 @@
   "name": "dusa-perf-tests",
   "type": "module",
   "dependencies": {
-    "dusa": "^0.0.12"
+    "dusa": "^0.0.13"
   }
 }
