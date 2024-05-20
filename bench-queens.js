@@ -18,7 +18,7 @@ function getDataLP(size) {
 }
 
 PRINT_COMMANDS_TO_STDERR.current = true;
-console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Output');
+console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Solutions,Output');
 for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
   for (const size of sizes) {
     const jsonFilename = getSizeJSON(size);
@@ -26,28 +26,28 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
     const seed = 0xcafe + 0xbeef * reps;
 
     if (CLINGO_VERSION) {
-      const { result, time } = await testClingo('n-queens-0', lpFilename, 'numqueens', seed, NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,pure-asp,dusa-${DUSA_VERSION},clingo-0,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testClingo('n-queens-0', lpFilename, 'numqueens', seed, NUMBER_OF_QUEEN_SOLUTIONS);
+      console.log(`n-queens,pure-asp,dusa-${DUSA_VERSION},clingo-0,${size},${reps},${time},${solutions},${result}`);
     }
 
     {
-      const { result, time } = await testDusa('n-queens-1', jsonFilename, 'location', NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,fclp,dusa-${DUSA_VERSION},dusa-1,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testDusa('n-queens-1', jsonFilename, 'location', NUMBER_OF_QUEEN_SOLUTIONS);
+      console.log(`n-queens,fclp,dusa-${DUSA_VERSION},dusa-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     {
-      const { result, time } = await testDusa('n-queens-2', jsonFilename, 'col', NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,fclp,dusa-${DUSA_VERSION},dusa-2,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testDusa('n-queens-2', jsonFilename, 'col', NUMBER_OF_QUEEN_SOLUTIONS);
+      console.log(`n-queens,fclp,dusa-${DUSA_VERSION},dusa-2,${size},${reps},${time},${solutions},${result}`);
     }
 
     {
-      const { result, time } = await testDusa('n-queens-3', jsonFilename, 'rowFor', NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,fclp,dusa-${DUSA_VERSION},dusa-3,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testDusa('n-queens-3', jsonFilename, 'rowFor', NUMBER_OF_QUEEN_SOLUTIONS);
+      console.log(`n-queens,fclp,dusa-${DUSA_VERSION},dusa-3,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { result, time } = await testClingo('n-queens-4', lpFilename, 'numqueens', seed, NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,clingo-asp,dusa-${DUSA_VERSION},clingo-4,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testClingo('n-queens-4', lpFilename, 'numqueens', seed, NUMBER_OF_QUEEN_SOLUTIONS);
+      console.log(`n-queens,clingo-asp,dusa-${DUSA_VERSION},clingo-4,${size},${reps},${time},${solutions},${result}`);
     }
   }
 }

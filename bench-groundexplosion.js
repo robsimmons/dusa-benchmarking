@@ -30,7 +30,7 @@ function getDimLP(size) {
 
 PRINT_COMMANDS_TO_STDERR.current = true;
 let reps = 0;
-console.log('Algorithm,Dialect,System,Problem type,Problem Size,Rep,Time,Output');
+console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Solutions,Output');
 for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
   for (const size of sizes) {
     const expected_solutions = 10;
@@ -39,33 +39,33 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
     const seed = 0xcafe + 0xbeef * reps; // Whimsy
 
     {
-      const { result, time } = await testDusa('groundexplosion', jsonFilename, 'p', 1);
-      console.log(`groundexplosion,fclp,dusa-${DUSA_VERSION},return-1,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testDusa('groundexplosion', jsonFilename, 'p', 1);
+      console.log(`groundexplosion,fclp,dusa-${DUSA_VERSION},return-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     {
-      const { result, time } = await testDusa('groundexplosion', jsonFilename, 'p', expected_solutions);
-      console.log(`groundexplosion,fclp,dusa-${DUSA_VERSION},return-10,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testDusa('groundexplosion', jsonFilename, 'p', expected_solutions);
+      console.log(`groundexplosion,fclp,dusa-${DUSA_VERSION},return-10,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { result, time } = await testClingo('groundexplosion', lpFilename, 'numselected', seed, 1);
-      console.log(`groundexplosion,pure-asp,clingo-${CLINGO_VERSION},return-1,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testClingo('groundexplosion', lpFilename, 'numselected', seed, 1);
+      console.log(`groundexplosion,pure-asp,clingo-${CLINGO_VERSION},return-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { result, time } = await testClingo('groundexplosion', lpFilename, 'numselected', seed, expected_solutions);
-      console.log(`groundexplosion,pure-asp,clingo-${CLINGO_VERSION},return-10,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testClingo('groundexplosion', lpFilename, 'numselected', seed, expected_solutions);
+      console.log(`groundexplosion,pure-asp,clingo-${CLINGO_VERSION},return-10,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (ALPHA_EXISTS) {
-      const { result, time } = await testAlpha('groundexplosion', lpFilename, 'numselected', seed, 1);
-      console.log(`groundexplosion,pure-asp,alpha,return-1,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testAlpha('groundexplosion', lpFilename, 'numselected', seed, 1);
+      console.log(`groundexplosion,pure-asp,alpha,return-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (ALPHA_EXISTS) {
-      const { result, time } = await testAlpha('groundexplosion', lpFilename, 'numselected', seed, expected_solutions);
-      console.log(`groundexplosion,pure-asp,alpha,return-10,${size},${reps},${time},${result}`);
+      const { solutions, result, time } = await testAlpha('groundexplosion', lpFilename, 'numselected', seed, expected_solutions);
+      console.log(`groundexplosion,pure-asp,alpha,return-10,${size},${reps},${time},${solutions},${result}`);
     }
   }
 }
