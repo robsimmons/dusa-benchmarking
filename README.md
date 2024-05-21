@@ -36,9 +36,7 @@ The `node graph-tests.js` benchmarker will grab Clingo data if `clingo` is on yo
 
 ## License
 
-Contents of the `asp/` and `data/` directories and subdirectories are
-MIT-licensed. All other code, including the Dusa implementation itself, is
-licensed under the GNU General Public License v3.0 (see LICENSE).
+Contents of the `test-programs/` and `data/` directories and subdirectories are licensed under the BSD 2-Clause license. All other code, including the Dusa implementation itself, is licensed under the GNU General Public License v3.0 (see LICENSE). The contents of the `test-programs/` directory includes work by Antonius Weinzierl, Lorenz Leutgeb, and Torsten Schaub.
 
 Dusa is presently under the GPL is to make it easy for many people to use
 the software while maintaining some ownership of software that took a
