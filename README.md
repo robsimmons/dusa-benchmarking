@@ -49,3 +49,17 @@ or your company but you'd like to use it, I'd be delighted to discuss
 making that possible, and if you want to sponsor me to relicense Dusa
 more permissively, I'd probably sell out pretty cheaply all things
 considered, just sayin'. --- Rob
+
+## Setting up from scratch
+
+Tested on AWS m7g.large with Ubuntu Server 24.04 LTS (HVM), SSD Volume Type
+
+```
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install gringo default-jre git nodejs npm
+rm -rf dusa-benchmarking && git clone https://github.com/robsimmons/dusa-benchmarking.git
+cd dusa-benchmarking
+npm install
+curl -L https://github.com/alpha-asp/Alpha/releases/download/0.7.0/alpha-cli-app-0.7.0-bundled.jar > alpha.jar
+```

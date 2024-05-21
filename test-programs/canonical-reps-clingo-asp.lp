@@ -11,3 +11,5 @@ representative(Y,Rep) :-
 % Representatives must be unique
 % Every node must have a representative
 :- node(X), not 1{representative(X,R) : node(R)}1.
+
+isRep(_,X) :- representative(X).

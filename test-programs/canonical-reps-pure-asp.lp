@@ -14,3 +14,5 @@ representative(Y,Rep) :-
 % Every node must have a representative
 hasRep(X) :- representative(X,_).
 :- node(X), not hasRep(X).
+
+isRep(X) :- representative(_,X).

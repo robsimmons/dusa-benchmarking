@@ -105,17 +105,17 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
       }
 
       if (ALPHA_EXISTS) {
-        const { solutions, result, time } = await testAlpha('canonical-reps-pure-asp', filename, 'representative', seed);
+        const { solutions, result, time } = await testAlpha('canonical-reps-pure-asp', filename, 'isRep', seed);
         console.log(`canonical-reps,pure-asp,alpha,${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (CLINGO_VERSION) {
-        const { solutions, result, time } = await testClingo('canonical-reps-clingo-asp', filename, 'representative/2', seed);
+        const { solutions, result, time } = await testClingo('canonical-reps-clingo-asp', filename, 'isRep/1', seed);
         console.log(`canonical-reps,clingo-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
 
       if (CLINGO_VERSION) {
-        const { solutions, result, time } = await testClingo('canonical-reps-pure-asp', filename, 'representative/2', seed);
+        const { solutions, result, time } = await testClingo('canonical-reps-pure-asp', filename, 'isRep/1', seed);
         console.log(`canonical-reps,pure-asp,clingo-${CLINGO_VERSION},${variant},${numEdges},${reps},${time},${solutions},${result}`);
       }
     }
