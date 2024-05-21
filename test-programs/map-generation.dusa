@@ -1,0 +1,47 @@
+#builtin INT_PLUS plus
+#builtin INT_MINUS minus
+
+dim Width :- width is Width.
+dim (minus N 1) :- dim N, N != 1.
+
+solid X Y is { tt, ff } :-
+    dim X, dim Y.
+
+start 1 1.
+finish W W :- width is W.
+step 0 -1.
+step 0 1.
+step 1 0.
+step -1 0.
+
+reachable X Y :- 
+    start X Y,
+    solid X Y is tt.
+reachable NX NY :-
+    reachable X Y,
+    step DX DY,
+    NX == plus X DX,
+    NY == plus Y DY,
+    solid NX NY is tt.
+
+#demand finish X Y,
+    reachable X Y.
+
+
+at X Y 0 :- 
+    start X Y,
+    solid X Y is tt.
+at NX NY (plus T 1) :-
+    at X Y T,
+    length is Len,
+    T < Len,
+    step DX DY,
+    NX == plus X DX,
+    NY == plus Y DY,
+    solid NX NY is tt.
+
+speedrun :- finish X Y, at X Y _.
+#forbid speedrun.
+
+reachable_edge X Y :- width is X, reachable X Y.
+reachable_edge X Y :- width is Y, reachable X Y.
