@@ -27,7 +27,7 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
 
     if (CLINGO_VERSION) {
       const { solutions, result, time } = await testClingo('n-queens-0', lpFilename, 'queen/2', seed, NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,pure-asp,dusa-${DUSA_VERSION},clingo-0,${size},${reps},${time},${solutions},${result}`);
+      console.log(`n-queens,pure-asp,clingo-${CLINGO_VERSION},clingo-0,${size},${reps},${time},${solutions},${result}`);
     }
 
     {
@@ -47,7 +47,7 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
 
     if (CLINGO_VERSION) {
       const { solutions, result, time } = await testClingo('n-queens-4', lpFilename, 'queen/2', seed, NUMBER_OF_QUEEN_SOLUTIONS);
-      console.log(`n-queens,clingo-asp,dusa-${DUSA_VERSION},clingo-4,${size},${reps},${time},${solutions},${result}`);
+      console.log(`n-queens,clingo-asp,clingo-${CLINGO_VERSION},clingo-4,${size},${reps},${time},${solutions},${result}`);
     }
   }
 }
