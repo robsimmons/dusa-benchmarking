@@ -1,6 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { exec } from 'child_process';
-import { randomUUID } from 'crypto';
 import { tmpdir } from 'os';
 
 export const PRINT_COMMANDS_TO_STDERR = { current: false };
@@ -43,7 +42,7 @@ export const TIMEOUT_EPSILON = 500;
 
 export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToCount = 1, timeout = TIMEOUT) {
   const start = performance.now();
-  const command = `node run-dusa.js test-programs/${dusaProgram}.dusa ${jsonFilename} ${relation} ${solutionsToCount}`;
+  const command = `node --max-old-space-size=9000 run-dusa.js test-programs/${dusaProgram}.dusa ${jsonFilename} ${relation} ${solutionsToCount}`;
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
@@ -95,7 +94,7 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
 
 export async function testAlpha(alphaProgram, dataFilename, relation, seed, solutionsToCount = 1, timeout = TIMEOUT) {
   const start = performance.now();
-  const command = `java -jar alpha.jar -n${solutionsToCount} -dni -i test-programs/${alphaProgram}.lp -i ${dataFilename} -f${relation} -e${seed}`;
+  const command = `java -Xms1g -Xmx9g -jar alpha.jar -n${solutionsToCount} -dni -i test-programs/${alphaProgram}.lp -i ${dataFilename} -f${relation} -e${seed}`;
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
