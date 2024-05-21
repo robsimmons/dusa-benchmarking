@@ -48,7 +48,7 @@ export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToC
     process.stderr.write(`exec: ${command}\n`);
   }
   const [solutions, result] = await new Promise((resolve) => {
-    exec(command, { timeout: timeout + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+    exec(command, { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024 }, (_error, stdout, _stderr) => {
       const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
       if (!stdout.trim().endsWith('DONE')) {
         resolve([-1, 0]);
@@ -75,7 +75,7 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
     process.stderr.write(`exec: ${command}\n`);
   }
   const [solutions, result] = await new Promise((resolve) => {
-    exec(command, { timeout: timeout + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+    exec(command, { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024 }, (_error, stdout, _stderr) => {
       if (!stdout.trimEnd().endsWith('SATISFIABLE')) {
         resolve([-1, 0]);
         return;
@@ -100,7 +100,7 @@ export async function testAlpha(alphaProgram, dataFilename, relation, seed, solu
     process.stderr.write(`exec: ${command}\n`);
   }
   const [solutions, result] = await new Promise((resolve) => {
-    exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
+    exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024 }, (_error, stdout, _stderr) => {
       if (!stdout.trim().endsWith('SATISFIABLE')) {
         resolve([-1, 0]);
         return;

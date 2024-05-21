@@ -52,7 +52,7 @@ considered, just sayin'. --- Rob
 
 ## Setting up from scratch
 
-Tested on AWS m7g.large with Ubuntu Server 24.04 LTS (HVM), SSD Volume Type
+Tested on AWS m7g.large with 64-bit (Arm) "Ubuntu Server 24.04 LTS (HVM), SSD Volume Type". The following commands set up a fresh install to run any of the benchmark commands ("`node bench-...`") aboce.
 
 ```
 sudo apt-get update
