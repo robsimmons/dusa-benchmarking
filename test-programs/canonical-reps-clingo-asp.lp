@@ -12,4 +12,4 @@ representative(Y,Rep) :-
 % Every node must have a representative
 :- node(X), not 1{representative(X,R) : node(R)}1.
 
-isRep(_,X) :- representative(X).
+isRep(X) :- representative(_,X).
