@@ -42,7 +42,7 @@ function getDataJSON(nodes, edges, reps) {
 PRINT_COMMANDS_TO_STDERR.current = true;
 console.log('Problem,Dialect,System,Problem variant,Problem size,Rep,Time,Solutions,Output');
 let i = 0;
-for (const [name, { nodes, edges, variants }] of [...Object.entries(data)].sort(([_a, a], [_b, b]) => a.nodes - b.nodes)) {
+for (const [_, { nodes, edges, variants }] of [...Object.entries(data)].sort(([_a, a], [_b, b]) => a.nodes - b.nodes)) {
   for (const [reps, variant] of variants.entries()) {
     i++;
     const seed = 0xcafe + 0xbeef * i;
