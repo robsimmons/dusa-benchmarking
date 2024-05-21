@@ -11,6 +11,3 @@ representative(Y,Rep) :-
 % Representatives must be unique
 % Every node must have a representative
 :- node(X), not 1{representative(X,R) : node(R)}1.
-
-% Count the number of connected components
-repcount(N) :- N = #count{R : representative(X,R)}.

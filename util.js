@@ -66,8 +66,9 @@ export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToC
 }
 
 export async function testClingo(clingoProgram, dataFilename, relation, seed, solutionsToCount = 1, timeout = TIMEOUT) {
-  const showFilename = `${tmpdir()}/show-${relation}.lp`;
-  writeFileSync(showFilename, `#show ${relation}/1.`);
+  if (relation.indexOf('/') === -1) throw new Error('Relation must have arity');
+  const showFilename = `${tmpdir()}/show-${relation.slice(0, relation.indexOf('/'))}.lp`;
+  writeFileSync(showFilename, `#show ${relation}.`);
   const start = performance.now();
   const command = `clingo -n${solutionsToCount} -V0 --rand-freq=1 --seed=${seed} test-programs/${clingoProgram}.lp ${dataFilename} ${showFilename}`;
   if (PRINT_COMMANDS_TO_STDERR.current) {
@@ -75,16 +76,17 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
   }
   const [solutions, result] = await new Promise((resolve) => {
     exec(command, { timeout: timeout + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
-      const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
-      if (!stdout.trim().endsWith('SATISFIABLE')) {
+      if (!stdout.trimEnd().endsWith('SATISFIABLE')) {
         resolve([-1, 0]);
         return;
       }
+      const lines = stdout.trimEnd().split('\n');
+      const solutions = lines.slice(0, lines.length - 1);
       let sum = 0;
-      for (const match of matches) {
-        sum += parseInt(match[1]);
+      for (const solution of solutions) {
+        sum += (solution.match(/\(/g) || []).length;
       }
-      resolve([matches.length, sum]);
+      resolve([solutions.length, sum]);
     });
   });
   const end = performance.now();
@@ -99,16 +101,19 @@ export async function testAlpha(alphaProgram, dataFilename, relation, seed, solu
   }
   const [solutions, result] = await new Promise((resolve) => {
     exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON }, (_error, stdout, _stderr) => {
-      const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
       if (!stdout.trim().endsWith('SATISFIABLE')) {
         resolve([-1, 0]);
         return;
       }
+      const solutions = stdout
+        .trimEnd()
+        .split('\n')
+        .filter((line) => line.startsWith('{'));
       let sum = 0;
-      for (const match of matches) {
-        sum += parseInt(match[1]);
+      for (const solution of solutions) {
+        sum += (solution.match(/\(/g) || []).length;
       }
-      resolve([matches.length, sum]);
+      resolve([solutions.length, sum]);
     });
   });
   const end = performance.now();

@@ -16,5 +16,3 @@ inTree(P) :- parent(P,_).
 % If connected to a tree node, you must be in the tree
 :- edge(X,Y), inTree(X), not inTree(Y).
 
-% Count the nodes in the selected spanning tree
-treecount(N) :- N = #count{X : inTree(X)}.

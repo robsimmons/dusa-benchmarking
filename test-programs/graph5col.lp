@@ -15,4 +15,4 @@ colour(yellow0).
 colour(cyan0).
 :- node(X), not chosenColour(X,red0), not chosenColour(X,blue0), not chosenColour(X,yellow0), not chosenColour(X,green0), not chosenColour(X,cyan0).
 
-numRed(N) :- N = #count{X : chosenColour(X, red0)}.
+isRed(X) :- chosenColour(X,red0).

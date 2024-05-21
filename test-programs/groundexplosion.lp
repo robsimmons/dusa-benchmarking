@@ -14,4 +14,5 @@ nselect(X) :- dom(X), not select(X).
 
  :- not nselect(Y), select(X), dom(Y), X != Y.
 
-numselected(N) :- N = #count{X1,X2,X3,X4,X5,X6 : p(X1,X2,X3,X4,X5,X6)}.
+q(X) :- p(X,_,_,_,_,_).
+q(X-1) :- q(X), X != 1.

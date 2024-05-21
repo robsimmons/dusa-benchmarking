@@ -6,4 +6,3 @@
 :- queen(I,J), queen(II,JJ), (I,J) != (II,JJ), I-J == II-JJ.
 :- queen(I,J), queen(II,JJ), (I,J) != (II,JJ), I+J == II+JJ.
 
-numqueens(N) :- N = #count{X,Y : queen(X,Y)}.

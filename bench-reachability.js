@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { ALPHA_EXISTS, CLINGO_VERSION, DUSA_VERSION, PRINT_COMMANDS_TO_STDERR, testDusa } from './util.js';
+import { ALPHA_EXISTS, CLINGO_VERSION, DUSA_VERSION, PRINT_COMMANDS_TO_STDERR, testAlpha, testClingo, testDusa } from './util.js';
 
 const data = JSON.parse(readFileSync('data/test-reachability.json'));
 
@@ -15,7 +15,7 @@ function getDataLP(nodes, multiplier, reps) {
   return filename;
 }
 function getDataJSON(nodes, multiplier, reps) {
-  const filename = `${tmp}/multiplier-${nodes}-${multiplier}-${reps}.json`;
+  const filename = `${tmp}/reachability-${nodes}-${multiplier}-${reps}.json`;
   const variant = data[`${nodes}/${multiplier}`];
   writeFileSync(
     filename,
@@ -41,6 +41,16 @@ for (const [_, { nodes, multiplier, variants }] of [...Object.entries(data)].sor
     {
       const { solutions, result, time } = await testDusa('reachability', jsonFilename, 'reachable', 10);
       console.log(`reachability,pure-asp,dusa-${DUSA_VERSION},${multiplier},${nodes},${reps},${time},${solutions},${result}`);
+    }
+
+    if (CLINGO_VERSION) {
+      const { solutions, result, time } = await testClingo('reachability', lpFilename, 'reachable/2', seed, 10);
+      console.log(`reachability,pure-asp,clingo-${CLINGO_VERSION},${multiplier},${nodes},${reps},${time},${solutions},${result}`);
+    }
+
+    if (ALPHA_EXISTS) {
+      const { solutions, result, time } = await testAlpha('reachability', lpFilename, 'reachable', seed, 10);
+      console.log(`reachability,pure-asp,alpha,${multiplier},${nodes},${reps},${time},${solutions},${result}`);
     }
   }
 }

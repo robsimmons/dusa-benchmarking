@@ -55,12 +55,12 @@ for (const [_, { nodes, edges, variants }] of [...Object.entries(data)].sort(([_
     }
 
     if (ALPHA_EXISTS) {
-      const { solutions, result, time } = await testAlpha('graph5col', lpFilename, 'numRed', seed, 10);
+      const { solutions, result, time } = await testAlpha('graph5col', lpFilename, 'isRed', seed, 10);
       console.log(`graph5col,pure-asp,alpha,${edges / nodes},${nodes},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { solutions, result, time } = await testClingo('graph5col', lpFilename, 'numRed', seed, 10);
+      const { solutions, result, time } = await testClingo('graph5col', lpFilename, 'isRed/1', seed, 10);
       console.log(`graph5col,pure-asp,clingo-${CLINGO_VERSION},${edges / nodes},${nodes},${reps},${time},${solutions},${result}`);
     }
   }

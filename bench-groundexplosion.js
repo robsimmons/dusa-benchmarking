@@ -39,32 +39,32 @@ for (let reps = 1; reps <= NUMBER_OF_REPS; reps++) {
     const seed = 0xcafe + 0xbeef * reps; // Whimsy
 
     {
-      const { solutions, result, time } = await testDusa('groundexplosion', jsonFilename, 'p', 1);
+      const { solutions, result, time } = await testDusa('groundexplosion', jsonFilename, 'q', 1);
       console.log(`groundexplosion,fclp,dusa-${DUSA_VERSION},return-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     {
-      const { solutions, result, time } = await testDusa('groundexplosion', jsonFilename, 'p', expected_solutions);
+      const { solutions, result, time } = await testDusa('groundexplosion', jsonFilename, 'q', expected_solutions);
       console.log(`groundexplosion,fclp,dusa-${DUSA_VERSION},return-10,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { solutions, result, time } = await testClingo('groundexplosion', lpFilename, 'numselected', seed, 1);
+      const { solutions, result, time } = await testClingo('groundexplosion', lpFilename, 'q/1', seed, 1);
       console.log(`groundexplosion,pure-asp,clingo-${CLINGO_VERSION},return-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (CLINGO_VERSION) {
-      const { solutions, result, time } = await testClingo('groundexplosion', lpFilename, 'numselected', seed, expected_solutions);
+      const { solutions, result, time } = await testClingo('groundexplosion', lpFilename, 'q/1', seed, expected_solutions);
       console.log(`groundexplosion,pure-asp,clingo-${CLINGO_VERSION},return-10,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (ALPHA_EXISTS) {
-      const { solutions, result, time } = await testAlpha('groundexplosion', lpFilename, 'numselected', seed, 1);
+      const { solutions, result, time } = await testAlpha('groundexplosion', lpFilename, 'q', seed, 1);
       console.log(`groundexplosion,pure-asp,alpha,return-1,${size},${reps},${time},${solutions},${result}`);
     }
 
     if (ALPHA_EXISTS) {
-      const { solutions, result, time } = await testAlpha('groundexplosion', lpFilename, 'numselected', seed, expected_solutions);
+      const { solutions, result, time } = await testAlpha('groundexplosion', lpFilename, 'q', seed, expected_solutions);
       console.log(`groundexplosion,pure-asp,alpha,return-10,${size},${reps},${time},${solutions},${result}`);
     }
   }

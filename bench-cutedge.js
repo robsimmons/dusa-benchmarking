@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { ALPHA_EXISTS, CLINGO_VERSION, DUSA_VERSION, PRINT_COMMANDS_TO_STDERR, testDusa } from './util.js';
+import { ALPHA_EXISTS, CLINGO_VERSION, DUSA_VERSION, PRINT_COMMANDS_TO_STDERR, testAlpha, testClingo, testDusa } from './util.js';
 
 const data = JSON.parse(readFileSync('data/test-cutedge.json'));
 
@@ -41,6 +41,16 @@ for (const [_, { nodes, percentage, variants }] of [...Object.entries(data)].sor
     {
       const { solutions, result, time } = await testDusa('cutedge', jsonFilename, 'reachable', 10);
       console.log(`cutedge,pure-asp,dusa-${DUSA_VERSION},${percentage}%,${nodes},${reps},${time},${solutions},${result}`);
+    }
+
+    if (CLINGO_VERSION) {
+      const { solutions, result, time } = await testClingo('cutedge', lpFilename, 'reachable/2', seed, 10);
+      console.log(`cutedge,pure-asp,clingo-${CLINGO_VERSION},${percentage}%,${nodes},${reps},${time},${solutions},${result}`);
+    }
+
+    if (ALPHA_EXISTS) {
+      const { solutions, result, time } = await testAlpha('cutedge', lpFilename, 'reachable', seed, 10);
+      console.log(`cutedge,pure-asp,alpha,${percentage}%,${nodes},${reps},${time},${solutions},${result}`);
     }
   }
 }

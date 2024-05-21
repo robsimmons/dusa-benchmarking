@@ -17,3 +17,6 @@ nselect X is? ff :- dom X.
 nselect X is tt :- dom X, select X is ff.
 
 #forbid nselect Y is ff, select X is tt, dom Y, X != Y.
+
+q X :- p X _ _ _ _ _.
+q (minus X 1) :- q X, X != 1.
