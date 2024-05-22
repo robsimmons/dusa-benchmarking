@@ -47,20 +47,24 @@ export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToC
     process.stderr.write(`exec: ${command}\n`);
   }
   const [end, solutions, result] = await new Promise((resolve) => {
-    const proc = exec(command, { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024 }, (_error, stdout, _stderr) => {
-      const end = performance.now();
-      proc.kill(9);
-      const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
-      if (!stdout.trim().endsWith('DONE')) {
-        resolve([end, -1, 0]);
-        return;
-      }
-      let sum = 0;
-      for (const match of matches) {
-        sum += parseInt(match[1]);
-      }
-      resolve([end, matches.length, sum]);
-    });
+    const proc = exec(
+      command,
+      { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024, killSignal: 9 },
+      (_error, stdout, _stderr) => {
+        const end = performance.now();
+        proc.kill(9);
+        const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
+        if (!stdout.trim().endsWith('DONE')) {
+          resolve([end, -1, 0]);
+          return;
+        }
+        let sum = 0;
+        for (const match of matches) {
+          sum += parseInt(match[1]);
+        }
+        resolve([end, matches.length, sum]);
+      },
+    );
   });
   return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }
@@ -75,21 +79,25 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
     process.stderr.write(`exec: ${command}\n`);
   }
   const [end, solutions, result] = await new Promise((resolve) => {
-    const proc = exec(command, { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024 }, (_error, stdout, _stderr) => {
-      const end = performance.now();
-      proc.kill(9);
-      if (!stdout.trimEnd().endsWith('SATISFIABLE')) {
-        resolve([end, -1, 0]);
-        return;
-      }
-      const lines = stdout.trimEnd().split('\n');
-      const solutions = lines.slice(0, lines.length - 1);
-      let sum = 0;
-      for (const solution of solutions) {
-        sum += (solution.match(/\(/g) || []).length;
-      }
-      resolve([end, solutions.length, sum]);
-    });
+    const proc = exec(
+      command,
+      { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024, killSignal: 9 },
+      (_error, stdout, _stderr) => {
+        const end = performance.now();
+        proc.kill(9);
+        if (!stdout.trimEnd().endsWith('SATISFIABLE')) {
+          resolve([end, -1, 0]);
+          return;
+        }
+        const lines = stdout.trimEnd().split('\n');
+        const solutions = lines.slice(0, lines.length - 1);
+        let sum = 0;
+        for (const solution of solutions) {
+          sum += (solution.match(/\(/g) || []).length;
+        }
+        resolve([end, solutions.length, sum]);
+      },
+    );
   });
   return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }
@@ -101,23 +109,27 @@ export async function testAlpha(alphaProgram, dataFilename, relation, seed, solu
     process.stderr.write(`exec: ${command}\n`);
   }
   const [end, solutions, result] = await new Promise((resolve) => {
-    const proc = exec(command, { timeout: TIMEOUT + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024 }, (_error, stdout, _stderr) => {
-      const end = performance.now();
-      proc.kill(9);
-      if (!stdout.trim().endsWith('SATISFIABLE')) {
-        resolve([end, -1, 0]);
-        return;
-      }
-      const solutions = stdout
-        .trimEnd()
-        .split('\n')
-        .filter((line) => line.startsWith('{'));
-      let sum = 0;
-      for (const solution of solutions) {
-        sum += (solution.match(/\(/g) || []).length;
-      }
-      resolve([end, solutions.length, sum]);
-    });
+    const proc = exec(
+      command,
+      { timeout: TIMEOUT + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024, killSignal: 9 },
+      (_error, stdout, _stderr) => {
+        const end = performance.now();
+        proc.kill(9);
+        if (!stdout.trim().endsWith('SATISFIABLE')) {
+          resolve([end, -1, 0]);
+          return;
+        }
+        const solutions = stdout
+          .trimEnd()
+          .split('\n')
+          .filter((line) => line.startsWith('{'));
+        let sum = 0;
+        for (const solution of solutions) {
+          sum += (solution.match(/\(/g) || []).length;
+        }
+        resolve([end, solutions.length, sum]);
+      },
+    );
   });
   return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }

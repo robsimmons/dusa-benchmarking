@@ -55,4 +55,6 @@ rm -rf dusa-benchmarking && git clone https://github.com/robsimmons/dusa-benchma
 cd dusa-benchmarking
 npm install
 curl -L https://github.com/alpha-asp/Alpha/releases/download/0.7.0/alpha-cli-app-0.7.0-bundled.jar > alpha.jar
+echo "" | sudo tee -a /etc/security/limits.conf
+echo "ubuntu hard as 10000000" | sudo tee -a /etc/security/limits.conf
 ```
