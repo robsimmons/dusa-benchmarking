@@ -106,13 +106,6 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
         resolve([end, solutions.length, sum]);
       },
     );
-    process.stderr.write(`pid: ${proc.pid}\n`);
-  });
-  await new Promise((resolve) => {
-    exec(`ps x`, {}, (_, stdout) => {
-      process.stderr.write(`${stdout}\n`);
-      resolve();
-    });
   });
   return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }
