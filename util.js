@@ -42,7 +42,7 @@ export const TIMEOUT_EPSILON = 500;
 
 export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToCount = 1, timeout = TIMEOUT) {
   const start = performance.now();
-  const command = `node --max-old-space-size=9000 run-dusa.js test-programs/${dusaProgram}.dusa ${jsonFilename} ${relation} ${solutionsToCount}`;
+  const command = `node run-dusa.js test-programs/${dusaProgram}.dusa ${jsonFilename} ${relation} ${solutionsToCount}`;
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
@@ -98,13 +98,20 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
         resolve([end, solutions.length, sum]);
       },
     );
+    process.stderr.write(`pid: ${proc.pid}\n`);
+  });
+  await new Promise((resolve) => {
+    exec(`ps x`, {}, (_, stdout) => {
+      process.stderr.write(`${stdout}\n`);
+      resolve();
+    });
   });
   return end - start > timeout ? { solutions: -2, result: 0, time: timeout } : { solutions, result, time: end - start };
 }
 
 export async function testAlpha(alphaProgram, dataFilename, relation, seed, solutionsToCount = 1, timeout = TIMEOUT) {
   const start = performance.now();
-  const command = `java -Xms1g -Xmx9g -jar alpha.jar -n${solutionsToCount} -dni -i test-programs/${alphaProgram}.lp -i ${dataFilename} -f${relation} -e${seed}`;
+  const command = `java -jar alpha.jar -n${solutionsToCount} -dni -i test-programs/${alphaProgram}.lp -i ${dataFilename} -f${relation} -e${seed}`;
   if (PRINT_COMMANDS_TO_STDERR.current) {
     process.stderr.write(`exec: ${command}\n`);
   }
