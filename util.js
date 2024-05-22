@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { tmpdir } from 'os';
 
 export const PRINT_COMMANDS_TO_STDERR = { current: false };
@@ -42,17 +42,17 @@ export const TIMEOUT_EPSILON = 500;
 
 export async function testDusa(dusaProgram, jsonFilename, relation, solutionsToCount = 1, timeout = TIMEOUT) {
   const start = performance.now();
-  const command = `node run-dusa.js test-programs/${dusaProgram}.dusa ${jsonFilename} ${relation} ${solutionsToCount}`;
+  const args = [`run-dusa.js`, `test-programs/${dusaProgram}.dusa`, `${jsonFilename}`, `${relation}`, `${solutionsToCount}`];
   if (PRINT_COMMANDS_TO_STDERR.current) {
-    process.stderr.write(`exec: ${command}\n`);
+    process.stderr.write(`exec: node ${args.join(' ')}\n`);
   }
   const [end, solutions, result] = await new Promise((resolve) => {
-    const proc = exec(
-      command,
+    const proc = execFile(
+      'node',
+      args,
       { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024, killSignal: 9 },
       (_error, stdout, _stderr) => {
         const end = performance.now();
-        proc.kill(9);
         const matches = [...stdout.matchAll(/\(([0-9]*)\)/g)];
         if (!stdout.trim().endsWith('DONE')) {
           resolve([end, -1, 0]);
@@ -74,17 +74,25 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
   const showFilename = `${tmpdir()}/show-${relation.slice(0, relation.indexOf('/'))}.lp`;
   writeFileSync(showFilename, `#show ${relation}.`);
   const start = performance.now();
-  const command = `clingo -n${solutionsToCount} -V0 --rand-freq=1 --seed=${seed} test-programs/${clingoProgram}.lp ${dataFilename} ${showFilename}`;
+  const args = [
+    `-n${solutionsToCount}`,
+    `-V0`,
+    `--rand-freq=1`,
+    `--seed=${seed}`,
+    `test-programs/${clingoProgram}.lp`,
+    `${dataFilename}`,
+    `${showFilename}`,
+  ];
   if (PRINT_COMMANDS_TO_STDERR.current) {
-    process.stderr.write(`exec: ${command}\n`);
+    process.stderr.write(`exec: clingo ${args.join(' ')}\n`);
   }
   const [end, solutions, result] = await new Promise((resolve) => {
-    const proc = exec(
-      command,
+    const proc = execFile(
+      'clingo',
+      args,
       { timeout: timeout + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024, killSignal: 9 },
       (_error, stdout, _stderr) => {
         const end = performance.now();
-        proc.kill(9);
         if (!stdout.trimEnd().endsWith('SATISFIABLE')) {
           resolve([end, -1, 0]);
           return;
@@ -111,17 +119,28 @@ export async function testClingo(clingoProgram, dataFilename, relation, seed, so
 
 export async function testAlpha(alphaProgram, dataFilename, relation, seed, solutionsToCount = 1, timeout = TIMEOUT) {
   const start = performance.now();
-  const command = `java -jar alpha.jar -n${solutionsToCount} -dni -i test-programs/${alphaProgram}.lp -i ${dataFilename} -f${relation} -e${seed}`;
+  const args = [
+    `-jar`,
+    `alpha.jar`,
+    `-n${solutionsToCount}`,
+    `-dni`,
+    `-i`,
+    `test-programs/${alphaProgram}.lp`,
+    `-i`,
+    `${dataFilename}`,
+    `-f${relation}`,
+    `-e${seed}`,
+  ];
   if (PRINT_COMMANDS_TO_STDERR.current) {
-    process.stderr.write(`exec: ${command}\n`);
+    process.stderr.write(`exec: java ${args.join(' ')}\n`);
   }
   const [end, solutions, result] = await new Promise((resolve) => {
-    const proc = exec(
-      command,
+    const proc = execFile(
+      'java',
+      args,
       { timeout: TIMEOUT + TIMEOUT_EPSILON, maxBuffer: 256 * 1024 * 1024, killSignal: 9 },
       (_error, stdout, _stderr) => {
         const end = performance.now();
-        proc.kill(9);
         if (!stdout.trim().endsWith('SATISFIABLE')) {
           resolve([end, -1, 0]);
           return;
