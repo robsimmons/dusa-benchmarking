@@ -1,4 +1,3 @@
-
 edge(X,Y) :- edge(Y,X).
 
 % Exactly one root
