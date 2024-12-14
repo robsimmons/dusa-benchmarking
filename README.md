@@ -1,6 +1,6 @@
 # Performance tests for Dusa
 
-Collects performance testing for the Dusa language.
+Collects performance testing for the [Dusa language](https://dusa.rocks/docs).
 
 ### Directories
 
